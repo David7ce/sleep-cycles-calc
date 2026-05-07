@@ -186,7 +186,7 @@
         <button id="nowBtn" type="button" class="ghost">Sleep now</button>
       </div>
 
-      <section id="result" class="result hidden" aria-live="polite">
+      <section id="result" class="result hidden" aria-live="polite" aria-label="Calculation results">
         <h2 id="resultTitle">Results</h2>
         <p>The average human takes <strong>15 minutes</strong> to fall asleep.</p>
         <p id="resultLead"></p>
@@ -246,7 +246,7 @@
         const title = document.createElement('h3');
         title.textContent = option.time;
         const text = document.createElement('p');
-        text.textContent = `${option.cycle} cycle${option.cycle > 1 ? 's' : ''} • ${style.message}`;
+        text.textContent = `${option.cycle} cycle${option.cycle > 1 ? 's' : ''} - ${style.message}`;
 
         card.append(title, text);
         cards.append(card);
