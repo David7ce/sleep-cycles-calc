@@ -187,7 +187,7 @@
       </div>
 
       <section id="result" class="result hidden" aria-live="polite">
-        <h2 id="resultTitle"></h2>
+        <h2 id="resultTitle">Results</h2>
         <p>The average human takes <strong>15 minutes</strong> to fall asleep.</p>
         <p id="resultLead"></p>
         <div id="cards" class="cards"></div>
@@ -211,7 +211,6 @@
       if (!value) return null;
       const [hour, minute] = value.split(':').map(Number);
       const date = new Date();
-      date.setSeconds(0, 0);
       date.setHours(hour, minute, 0, 0);
       return date;
     }
