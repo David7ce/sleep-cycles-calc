@@ -1,0 +1,52 @@
+{
+  "name": "Sleep Time Calculator",
+  "short_name": "Sleep Calc",
+  "description": "Calculate optimal sleep times based on 90-minute cycles",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f4f7fb",
+  "theme_color": "#1d4ed8",
+  "icons": [
+    {
+      "src": "icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-192-maskable.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icon-512-maskable.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "categories": ["health", "productivity"],
+  "shortcuts": [
+    {
+      "name": "Sleep now",
+      "short_name": "Sleep",
+      "description": "Calculate wake times if sleeping right now",
+      "url": "./index.html?mode=sleep-now",
+      "icons": [
+        {
+          "src": "icon-96.svg",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ]
+}

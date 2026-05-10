@@ -1,11 +1,29 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="description" content="Calculate optimal sleep times based on 90-minute cycles" />
+  <meta name="theme-color" content="#1d4ed8" />
+  <meta name="color-scheme" content="light" />
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json" />
+
+  <!-- iOS Web App Meta Tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Sleep Calc" />
+  <link rel="apple-touch-icon" href="icon-192.svg" />
+
+  <!-- Android Chrome Meta Tags -->
+  <meta name="mobile-web-app-capable" content="yes" />
+
   <title>Sleep Time Calculator</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
+
 <body>
   <main>
     <h1>Sleep Time Calculator</h1>
@@ -53,5 +71,19 @@
   </main>
 
   <script src="script.js"></script>
+
+  <!-- Register Service Worker for PWA functionality -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js')
+        .then((registration) => {
+          console.log('Service Worker registered:', registration);
+        })
+        .catch((error) => {
+          console.warn('Service Worker registration failed:', error);
+        });
+    }
+  </script>
 </body>
+
 </html>

@@ -1,0 +1,41 @@
+# Enable GZIP compression
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json
+</IfModule>
+
+# Cache control headers
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/html "access plus 1 hour"
+  ExpiresByType text/css "access plus 1 year"
+  ExpiresByType application/javascript "access plus 1 year"
+  ExpiresByType image/svg+xml "access plus 1 year"
+</IfModule>
+
+# Set correct MIME type for SVG
+AddType image/svg+xml svg svgz
+
+# Enable HTTPS redirect (uncomment if needed)
+# RewriteEngine On
+# RewriteCond %{HTTPS} off
+# RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Service Worker scope
+<FilesMatch "(service-worker\.js|manifest\.json)$">
+  Header set Cache-Control "no-cache, no-store, must-revalidate"
+  Header set Pragma "no-cache"
+  Header set Expires 0
+</FilesMatch>
+
+# Serve index.html for directory requests
+DirectoryIndex index.html
+
+# Route all 404s to index.html for SPA support (optional)
+# <IfModule mod_rewrite.c>
+#   RewriteEngine On
+#   RewriteBase /
+#   RewriteRule ^index\.html$ - [L]
+#   RewriteCond %{REQUEST_FILENAME} !-f
+#   RewriteCond %{REQUEST_FILENAME} !-d
+#   RewriteRule . /index.html [L]
+# </IfModule>
