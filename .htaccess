@@ -9,11 +9,11 @@
   ExpiresByType text/html "access plus 1 hour"
   ExpiresByType text/css "access plus 1 year"
   ExpiresByType application/javascript "access plus 1 year"
-  ExpiresByType image/svg+xml "access plus 1 year"
+  ExpiresByType image/x-icon "access plus 1 year"
 </IfModule>
 
-# Set correct MIME type for SVG
-AddType image/svg+xml svg svgz
+# Set correct MIME type for ICO
+AddType image/x-icon .ico
 
 # Enable HTTPS redirect (uncomment if needed)
 # RewriteEngine On

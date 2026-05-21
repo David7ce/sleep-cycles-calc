@@ -9,7 +9,7 @@ Simple, dependency-free Sleep Time Calculator with PWA support.
 - `script.js` - Application logic with localStorage persistence
 - `manifest.json` - PWA configuration
 - `service-worker.js` - Offline support and asset caching
-- `icon-*.svg` - App icons for different sizes and purposes
+- `favicon.ico` - Single multi-size icon for browser and app metadata
 
 ## Features
 
@@ -35,28 +35,26 @@ Then open `http://localhost:8000` on your phone and:
 
 ### Server Configuration
 
-Ensure your server serves SVG files with correct MIME type:
+Ensure your server serves ICO files with the correct MIME type:
 
 **Apache (.htaccess)**
 ```
-AddType image/svg+xml svg svgz
-AddEncoding gzip svgz
+AddType image/x-icon .ico
 ```
 
 **Nginx**
 ```
 types {
-  image/svg+xml svg svgz;
+  image/x-icon ico;
 }
-gzip_types image/svg+xml;
 ```
 
 **Node.js/Express**
 ```javascript
 app.use(express.static('.', {
   setHeaders: (res, path) => {
-    if (path.endsWith('.svg')) {
-      res.setHeader('Content-Type', 'image/svg+xml');
+    if (path.endsWith('.ico')) {
+      res.setHeader('Content-Type', 'image/x-icon');
     }
   }
 }));
