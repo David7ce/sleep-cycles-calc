@@ -1,13 +1,12 @@
 {
-  "name": "Sleep Time Calculator",
-  "short_name": "Sleep Calc",
-  "description": "Calculate optimal sleep times based on 90-minute cycles",
+  "name": "Sleep Cycles",
+  "short_name": "Sleep Cycles",
+  "description": "Find the best time to sleep or wake using 90-minute sleep cycles",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "orientation": "portrait-primary",
-  "background_color": "#f4f7fb",
-  "theme_color": "#1d4ed8",
+  "background_color": "#131730",
+  "theme_color": "#131730",
   "icons": [
     {
       "src": "android-chrome-192x192.png",

@@ -1,194 +1,108 @@
 const CYCLES = [6, 5, 4, 3, 2, 1];
-const DEFAULTS = {
-  age: 'adult',
-  wakeTime: '07:00',
-  bedTime: '23:00',
-  latency: '15'
-};
-const STORAGE_KEYS = {
-  age: 'sleepCalc.age',
-  wakeTime: 'sleepCalc.wakeTime',
-  bedTime: 'sleepCalc.bedTime',
-  latency: 'sleepCalc.latency'
-};
-const AGE_LABELS = {
-  child: 'Child (6-13) → 9-11h',
-  teen: 'Teen (14-17) → 8-10h',
-  adult: 'Adult (18-64) → 7-9h',
-  senior: 'Senior (65+) → 7-8h'
-};
+const MOONS = { 6: '🌕', 5: '🌔', 4: '🌓', 3: '🌒', 2: '🌘', 1: '🌑' };
+// Recommended sleep hours per age range (NSF guidelines).
+const AGE_HOURS = { child: [9, 11], teen: [8, 10], adult: [7, 9], senior: [7, 8] };
 
-const wakeTime = document.getElementById('wakeTime');
-const bedTime = document.getElementById('bedTime');
+const KEYS = { mode: 'sleepCalc.mode', wakeTime: 'sleepCalc.wakeTime', bedTime: 'sleepCalc.bedTime', age: 'sleepCalc.age', latency: 'sleepCalc.latency' };
+const DEFAULTS = { mode: 'wake', wakeTime: '07:00', bedTime: '23:00', age: 'adult', latency: '15' };
+
+const time = document.getElementById('time');
+const nowLabel = document.getElementById('nowLabel');
+const lead = document.getElementById('lead');
+const cards = document.getElementById('cards');
+const hint = document.getElementById('hint');
 const age = document.getElementById('age');
 const latency = document.getElementById('latency');
-const result = document.getElementById('result');
-const resultTitle = document.getElementById('resultTitle');
-const resultLead = document.getElementById('resultLead');
-const sleepSummary = document.getElementById('sleepSummary');
-const cards = document.getElementById('cards');
+const settings = document.getElementById('settings');
+const modeButtons = [...document.querySelectorAll('.mode button')];
 
-function getStoredValue(key, fallback) {
-  try {
-    return localStorage.getItem(key) ?? fallback;
-  } catch {
-    return fallback;
-  }
+let mode = DEFAULTS.mode;
+
+function store(key, value) {
+  try { localStorage.setItem(key, value); } catch { /* private mode */ }
 }
 
-function setStoredValue(key, value) {
-  try {
-    localStorage.setItem(key, value);
-  } catch {
-    // Ignore storage failures in private or restricted contexts.
-  }
+function load(key, fallback) {
+  try { return localStorage.getItem(key) ?? fallback; } catch { return fallback; }
+}
+
+function latencyMinutes() {
+  const n = Number.parseInt(latency.value, 10);
+  return Number.isFinite(n) && n >= 0 ? n : 0;
 }
 
 function fromTimeInput(value) {
-  if (!value) return null;
-  const [hour, minute] = value.split(':').map(Number);
-  const date = new Date();
-  date.setHours(hour, minute, 0, 0);
-  return date;
-}
-
-function plusMinutes(base, minutes) {
-  return new Date(base.getTime() + minutes * 60000);
+  const [h, m] = value.split(':').map(Number);
+  const d = new Date();
+  d.setHours(h, m, 0, 0);
+  return d;
 }
 
 function formatTime(date) {
-  return new Intl.DateTimeFormat(undefined, {
-    hour: 'numeric',
-    minute: '2-digit'
-  }).format(date);
+  return new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' }).format(date);
 }
 
-function cardStyle(cycle) {
-  if (cycle >= 5) {
-    return { cls: 'good', message: 'Best range (5-6 cycles) for a full night of rest.' };
-  }
-  if (cycle === 4) {
-    return { cls: 'ok', message: 'Acceptable rest, but you may still feel a bit tired.' };
-  }
-  return { cls: 'low', message: 'Short sleep window. Useful only when needed.' };
+function rating(hours) {
+  const [lo, hi] = AGE_HOURS[age.value] ?? AGE_HOURS.adult;
+  if (hours >= lo && hours <= hi) return 'good';
+  if (hours >= lo - 1.5 && hours <= hi + 1.5) return 'ok';
+  return 'low';
 }
 
-function updateSummary() {
-  const label = AGE_LABELS[age.value] ?? AGE_LABELS[DEFAULTS.age];
-  sleepSummary.textContent = `Age range: ${label}. Time to fall asleep: ${latency.value || DEFAULTS.latency} minutes.`;
-}
+function render() {
+  const now = new Date();
+  const base = mode === 'wake' || mode === 'bed' ? fromTimeInput(time.value || DEFAULTS[mode + 'Time']) : now;
+  const sign = mode === 'wake' ? -1 : 1;
+  const wait = latencyMinutes();
 
-function render(options) {
+  if (mode === 'now') nowLabel.textContent = formatTime(now);
+  lead.textContent = mode === 'wake' ? 'Go to bed at one of these times' : 'Wake up at one of these times';
+  hint.textContent = `1 cycle = 90 min · includes ${wait} min to fall asleep`;
+
   cards.innerHTML = '';
-  for (const option of options) {
-    const style = cardStyle(option.cycle);
+  for (const cycle of CYCLES) {
+    const when = new Date(base.getTime() + sign * (wait + cycle * 90) * 60000);
+    const hours = cycle * 1.5;
     const card = document.createElement('article');
-    card.className = `card ${style.cls}`;
-
-    const title = document.createElement('h3');
-    title.textContent = option.time;
-    const text = document.createElement('p');
-    text.textContent = `${option.cycle} cycle${option.cycle > 1 ? 's' : ''} - ${style.message}`;
-
-    card.append(title, text);
+    card.className = `card ${rating(hours)}`;
+    card.innerHTML = `
+      <span class="moon" aria-hidden="true">${MOONS[cycle]}</span>
+      <span class="time">${formatTime(when)}</span>
+      <span class="meta">${cycle} cycle${cycle > 1 ? 's' : ''} · ${hours} h</span>`;
     cards.append(card);
   }
-  result.classList.remove('hidden');
 }
 
-function sleepLatencyMinutes() {
-  const parsed = Number.parseInt(latency.value, 10);
-  return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0;
+function setMode(next) {
+  mode = next;
+  store(KEYS.mode, mode);
+  for (const btn of modeButtons) btn.setAttribute('aria-pressed', String(btn.dataset.mode === mode));
+  const isNow = mode === 'now';
+  time.classList.toggle('hidden', isNow);
+  nowLabel.classList.toggle('hidden', !isNow);
+  if (!isNow) time.value = load(KEYS[mode + 'Time'], DEFAULTS[mode + 'Time']);
+  render();
 }
 
-function calculateFromWakeup() {
-  const selected = fromTimeInput(wakeTime.value);
-  if (!selected) {
-    resultTitle.textContent = 'Pick a wake-up time first.';
-    resultLead.textContent = 'Then we can suggest bedtime options.';
-    cards.innerHTML = '';
-    result.classList.remove('hidden');
-    return;
-  }
-
-  const fallAsleep = sleepLatencyMinutes();
-  const options = CYCLES.map(cycle => {
-    const when = plusMinutes(selected, -(fallAsleep + cycle * 90));
-    return { cycle, time: formatTime(when) };
-  });
-
-  resultTitle.textContent = 'If you want to wake up at this time, try going to bed at:';
-  resultLead.textContent = 'These times help you wake between 90-minute cycles.';
-  updateSummary();
-  render(options);
+for (const btn of modeButtons) {
+  btn.addEventListener('click', () => setMode(btn.dataset.mode));
 }
 
-function calculateFromBedtime() {
-  const selected = fromTimeInput(bedTime.value);
-  if (!selected) {
-    resultTitle.textContent = 'Pick a bedtime first.';
-    resultLead.textContent = 'Then we can suggest wake-up options.';
-    cards.innerHTML = '';
-    result.classList.remove('hidden');
-    return;
-  }
-
-  const fallAsleep = sleepLatencyMinutes();
-  const options = CYCLES.map(cycle => {
-    const when = plusMinutes(selected, fallAsleep + cycle * 90);
-    return { cycle, time: formatTime(when) };
-  });
-
-  resultTitle.textContent = 'If you go to bed at this time, try waking up at:';
-  resultLead.textContent = 'A good night of sleep is usually 5-6 complete cycles.';
-  updateSummary();
-  render(options);
-}
-
-function calculateSleepNow() {
-  const now = new Date();
-  const fallAsleep = sleepLatencyMinutes();
-  const options = CYCLES.map(cycle => {
-    const when = plusMinutes(now, fallAsleep + cycle * 90);
-    return { cycle, time: formatTime(when) };
-  });
-
-  resultTitle.textContent = 'If you go to sleep right now, you should try to wake up at:';
-  resultLead.textContent = 'If you wake at one of these times, you will rise between 90-minute cycles.';
-  updateSummary();
-  render(options);
-}
-
-function bindPersistence() {
-  age.addEventListener('change', () => {
-    setStoredValue(STORAGE_KEYS.age, age.value);
-    updateSummary();
-  });
-
-  wakeTime.addEventListener('input', () => setStoredValue(STORAGE_KEYS.wakeTime, wakeTime.value));
-  bedTime.addEventListener('input', () => setStoredValue(STORAGE_KEYS.bedTime, bedTime.value));
-  latency.addEventListener('input', () => {
-    setStoredValue(STORAGE_KEYS.latency, latency.value);
-    updateSummary();
-  });
-}
-
-function restoreState() {
-  age.value = getStoredValue(STORAGE_KEYS.age, DEFAULTS.age);
-  wakeTime.value = getStoredValue(STORAGE_KEYS.wakeTime, DEFAULTS.wakeTime);
-  bedTime.value = getStoredValue(STORAGE_KEYS.bedTime, DEFAULTS.bedTime);
-  latency.value = getStoredValue(STORAGE_KEYS.latency, DEFAULTS.latency);
-  updateSummary();
-}
-
-restoreState();
-bindPersistence();
-
-document.getElementById('wakeBtn').addEventListener('click', calculateFromWakeup);
-document.getElementById('bedBtn').addEventListener('click', calculateFromBedtime);
-document.getElementById('nowBtn').addEventListener('click', calculateSleepNow);
-document.getElementById('backBtn').addEventListener('click', () => {
-  result.classList.add('hidden');
-  cards.innerHTML = '';
-  wakeTime.focus();
+time.addEventListener('input', () => {
+  if (time.value) store(KEYS[mode + 'Time'], time.value);
+  render();
 });
+
+age.addEventListener('change', () => { store(KEYS.age, age.value); render(); });
+latency.addEventListener('input', () => { store(KEYS.latency, latency.value); render(); });
+
+document.getElementById('settingsBtn').addEventListener('click', () => settings.showModal());
+document.getElementById('settingsClose').addEventListener('click', () => settings.close());
+
+// Keep "Sleep now" fresh as the clock moves.
+setInterval(() => { if (mode === 'now') render(); }, 30000);
+
+age.value = load(KEYS.age, DEFAULTS.age);
+latency.value = load(KEYS.latency, DEFAULTS.latency);
+const startMode = new URLSearchParams(location.search).get('mode') === 'sleep-now' ? 'now' : load(KEYS.mode, DEFAULTS.mode);
+setMode(['wake', 'bed', 'now'].includes(startMode) ? startMode : DEFAULTS.mode);

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sleeptime-calc-v3';
+const CACHE_NAME = 'sleeptime-calc-v4';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
