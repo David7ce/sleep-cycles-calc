@@ -5,8 +5,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="description" content="Find the best time to sleep or wake using 90-minute sleep cycles" />
-  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#eef0f8" />
-  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#131730" />
+  <meta name="theme-color" content="#0e0b20" />
 
   <!-- PWA Manifest -->
   <link rel="manifest" href="manifest.json" />
@@ -25,13 +24,19 @@
   <meta name="mobile-web-app-capable" content="yes" />
 
   <title>Sleep Cycles</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400..700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 
 <body>
+  <div class="shooting-star" aria-hidden="true"></div>
+  <div class="mountains" aria-hidden="true"></div>
   <main>
     <header>
-      <h1>Sleep Cycles</h1>
+      <span class="spacer" aria-hidden="true"></span>
+      <h1><a href="/">sleep cycles</a></h1>
       <button id="settingsBtn" class="icon-btn" type="button" aria-label="Settings">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -42,22 +47,51 @@
       </button>
     </header>
 
+    <p class="intro">I want to…</p>
+
     <div class="mode" role="group" aria-label="Calculation mode">
-      <button id="modeWake" type="button" data-mode="wake" aria-pressed="true">Wake up at</button>
-      <button id="modeBed" type="button" data-mode="bed" aria-pressed="false">Bed at</button>
-      <button id="modeNow" type="button" data-mode="now" aria-pressed="false">Sleep now</button>
+      <button id="modeBed" type="button" data-mode="bed" aria-pressed="false">go to bed at</button>
+      <button id="modeWake" type="button" data-mode="wake" aria-pressed="true">wake up at</button>
     </div>
 
     <div class="time-row">
-      <input id="time" type="time" aria-label="Time" />
-      <p id="nowLabel" class="now-label hidden"></p>
+      <div class="time-box">
+        <input id="hh" type="text" inputmode="numeric" maxlength="2" aria-label="Hour" />
+        <span aria-hidden="true">:</span>
+        <input id="mm" type="text" inputmode="numeric" maxlength="2" aria-label="Minutes" />
+      </div>
+      <button id="ampm" class="pill hidden" type="button" aria-label="Toggle AM/PM">PM</button>
     </div>
 
-    <p id="lead" class="lead" aria-live="polite"></p>
+    <button id="calc" class="cta" type="button">
+      Calculate
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M5 12h14" />
+        <path d="M12 5l7 7-7 7" />
+      </svg>
+    </button>
 
-    <div id="cards" class="cards" aria-live="polite"></div>
+    <button id="sleepNow" class="pill" type="button">Sleep now 😴</button>
 
-    <p id="hint" class="hint"></p>
+    <section id="results" class="results hidden">
+      <button id="back" class="pill pill-small back-btn" type="button">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M19 12H5" />
+          <path d="M12 19l-7-7 7-7" />
+        </svg>
+        Back
+      </button>
+      <p id="lead" class="lead" aria-live="polite"></p>
+      <div id="cards" class="cards" aria-live="polite"></div>
+      <p id="tip" class="tip"></p>
+    </section>
+
+    <footer>
+      <p id="hint" class="hint"></p>
+      <button id="aboutBtn" class="pill pill-small" type="button">How does it work?</button>
+    </footer>
   </main>
 
   <dialog id="settings" aria-labelledby="settingsTitle">
@@ -75,15 +109,37 @@
       Time to fall asleep (minutes)
       <input id="latency" type="number" min="0" max="120" value="15" />
     </label>
+    <label>
+      Time format
+      <select id="fmt">
+        <option value="24" selected>24-hour</option>
+        <option value="12">12-hour (AM/PM)</option>
+      </select>
+    </label>
     <button id="settingsClose" type="button">Done</button>
   </dialog>
 
+  <dialog id="about" aria-labelledby="aboutTitle">
+    <h2 id="aboutTitle">How does it work?</h2>
+    <div class="about-body">
+      <p>Sleep isn't uniform — it moves through repeating <strong>cycles of roughly 90 minutes</strong>, each passing
+        through light sleep, deep sleep, and REM (when most dreaming happens).</p>
+      <p>Waking up <strong>in the middle of a cycle</strong> — especially during deep sleep — causes sleep inertia:
+        that groggy, heavy feeling that can linger for a while. Waking <strong>between cycles</strong>, when sleep is
+        lightest, makes getting up much easier.</p>
+      <p>This calculator counts backward or forward in 90-minute steps, plus the time it takes you to fall asleep
+        (about <strong>15 minutes</strong> on average — adjustable in settings), so your alarm lands at the end of a
+        cycle instead of the middle.</p>
+      <p>How many cycles you need depends on age. The National Sleep Foundation recommends <strong>7–9 hours</strong>
+        (about 5–6 cycles) for adults, more for teens and children, slightly less for seniors. Cards are colored by how
+        close each option is to your recommended range.</p>
+      <p class="about-note">90 minutes is an average — real cycles range from about 70 to 120 minutes and vary
+        night to night. Treat the suggestions as good targets, not exact science.</p>
+    </div>
+    <button id="aboutClose" type="button">Got it</button>
+  </dialog>
+
   <script src="script.js"></script>
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js').catch(() => { });
-    }
-  </script>
 </body>
 
 </html>
