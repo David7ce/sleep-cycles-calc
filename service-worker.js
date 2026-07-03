@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sleeptime-calc-v6';
+const CACHE_NAME = 'sleeptime-calc-v7';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
@@ -6,11 +6,11 @@ const ASSETS_TO_CACHE = [
     './script.js',
     './manifest.json',
     './favicon.ico',
-    './favicon-16x16.png',
-    './favicon-32x32.png',
-    './apple-touch-icon.png',
-    './android-chrome-192x192.png',
-    './android-chrome-512x512.png'
+    './icons/favicon-16x16.png',
+    './icons/favicon-32x32.png',
+    './icons/apple-touch-icon.png',
+    './icons/android-chrome-192x192.png',
+    './icons/android-chrome-512x512.png'
 ];
 
 // Install event: cache assets

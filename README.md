@@ -19,7 +19,7 @@ Sleepytime-style sleep cycle calculator. Pick when you want to go to bed or wake
 - `script.js` — calculator logic, custom hh:mm input, persistence, service-worker registration
 - `manifest.json` — PWA configuration (install, "Sleep now" shortcut)
 - `service-worker.js` — offline cache (bump `CACHE_NAME` when assets change)
-- `faces/` — SVG source for the rating faces (inlined into `script.js` at runtime; kept as design source)
+- `icons/` — PNG app icons (`favicon.ico` stays at root — browsers request it there automatically)
 
 ## Develop / test locally
 
