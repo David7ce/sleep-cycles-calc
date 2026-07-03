@@ -1,11 +1,15 @@
+/* Mobile-first. Base styles target small screens; min-width queries only add. */
+
 :root {
   color-scheme: dark;
-  /* Night sky, sleepytime-style */
-  --bg1: #0b0818;
-  --bg2: #241c4e;
-  --bg3: #3a2d6e;
+  /* Night sky, blue-indigo */
+  --bg1: #0a0920;
+  --bg2: #1a114f;
+  --bg3: #2c2170;
   --card: rgba(255, 255, 255, 0.05);
   --card-border: rgba(180, 168, 240, 0.28);
+  --panel: rgba(26, 17, 79, 0.6);
+  --panel-border: rgba(190, 180, 255, 0.16);
   --text: #ece8fb;
   --muted: #a89fd6;
   --accent: #b3a5f2;
@@ -13,6 +17,14 @@
   --good: #7ee0a3;
   --ok: #f0cd7a;
   --low: #f08a8a;
+  /* Per-mode accent: near-white for "go to bed", soft dawn for "wake up" */
+  --mode-accent: #e2ddf8;
+  --mode-glow: rgba(226, 221, 248, 0.22);
+}
+
+body[data-mode="wake"] {
+  --mode-accent: #dfb987;
+  --mode-glow: rgba(223, 185, 135, 0.2);
 }
 
 * {
@@ -27,9 +39,9 @@ body {
 body {
   margin: 0;
   font-family: "Quicksand", ui-rounded, "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
-  font-size: 1.0625rem;
+  font-size: clamp(0.95rem, 0.9rem + 0.4vw, 1.0625rem);
   letter-spacing: 0.01em;
-  background: linear-gradient(180deg, var(--bg1) 0%, #171236 45%, var(--bg2) 75%, var(--bg3) 100%);
+  background: linear-gradient(180deg, var(--bg1) 0%, #140e3d 40%, var(--bg2) 70%, var(--bg3) 100%);
   color: var(--text);
   overflow-x: hidden;
 }
@@ -53,26 +65,26 @@ body::before {
   background-size: 480px 480px, 380px 380px, 320px 320px, 420px 420px, 300px 300px, 360px 360px, 440px 440px, 340px 340px;
 }
 
-/* Shooting star: streaks across the sky every few seconds */
+/* Shooting star: moves along a single rotated axis (vmax) so the angle
+   and shape stay identical on every screen size / aspect ratio */
 .shooting-star {
   position: fixed;
-  top: 12%;
-  left: -12%;
-  width: 130px;
+  top: 14%;
+  left: -8%;
+  width: clamp(80px, 12vmax, 140px);
   height: 2px;
   z-index: -1;
   pointer-events: none;
   border-radius: 999px;
   background: linear-gradient(90deg, rgba(255, 255, 255, 0.95), transparent);
   opacity: 0;
+  transform-origin: left center;
   animation: shoot 9s linear infinite 3s;
 }
 
 @keyframes shoot {
-
-  0%,
-  10%,
-  100% {
+  0% {
+    transform: rotate(18deg) translateX(0);
     opacity: 0;
   }
 
@@ -80,20 +92,16 @@ body::before {
     opacity: 1;
   }
 
-  0% {
-    transform: translate(0, 0) rotate(18deg);
-  }
-
-  10% {
-    transform: translate(70vw, 24vh) rotate(18deg);
-  }
-
-  10.01% {
-    transform: translate(0, 0) rotate(18deg);
+  10%,
+  100% {
+    transform: rotate(18deg) translateX(85vmax);
+    opacity: 0;
   }
 }
 
-/* Mountains: 3 layers, farther = lighter (atmospheric perspective) */
+/* Mountains: 3 layers of irregular ridgelines from repeating SVG tiles
+   with FIXED px size — the shape never deforms with screen size.
+   Solid opaque colors, farther = lighter. Tile edges match for seamless repeat. */
 .mountains,
 .mountains::before,
 .mountains::after {
@@ -103,26 +111,30 @@ body::before {
   bottom: 0;
   z-index: -1;
   pointer-events: none;
+  background-repeat: repeat-x;
 }
 
 .mountains {
-  height: 32vh;
-  background: linear-gradient(180deg, rgba(110, 95, 180, 0.30), rgba(70, 58, 130, 0.40));
-  clip-path: polygon(0 45%, 10% 20%, 21% 48%, 33% 12%, 45% 42%, 58% 18%, 70% 46%, 82% 10%, 93% 38%, 100% 25%, 100% 100%, 0 100%);
+  height: 210px;
+  background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 900 210'><polygon fill='%23453a86' points='0,120 70,55 150,130 240,25 330,105 400,65 480,150 560,45 640,115 720,75 800,140 860,95 900,120 900,210 0,210'/></svg>");
+  background-size: 900px 210px;
+  background-position: left bottom;
 }
 
 .mountains::before {
   content: "";
-  height: 24vh;
-  background: linear-gradient(180deg, rgba(48, 38, 100, 0.75), rgba(32, 24, 70, 0.85));
-  clip-path: polygon(0 60%, 8% 30%, 18% 55%, 28% 18%, 39% 50%, 50% 25%, 61% 55%, 73% 22%, 85% 52%, 94% 35%, 100% 48%, 100% 100%, 0 100%);
+  height: 150px;
+  background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 700 150'><polygon fill='%232b2166' points='0,80 60,110 130,40 210,100 290,55 360,115 440,35 520,95 600,60 660,105 700,80 700,150 0,150'/></svg>");
+  background-size: 700px 150px;
+  background-position: 120px bottom;
 }
 
 .mountains::after {
   content: "";
-  height: 16vh;
-  background: linear-gradient(180deg, rgba(16, 11, 38, 0.92), rgba(9, 6, 24, 1));
-  clip-path: polygon(0 40%, 12% 70%, 24% 25%, 37% 65%, 49% 30%, 62% 68%, 75% 28%, 87% 60%, 100% 35%, 100% 100%, 0 100%);
+  height: 100px;
+  background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 100'><polygon fill='%23120c33' points='0,55 50,75 110,30 180,70 250,40 320,80 390,25 450,60 500,55 500,100 0,100'/></svg>");
+  background-size: 500px 100px;
+  background-position: 60px bottom;
 }
 
 main {
@@ -133,22 +145,20 @@ main {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
+  gap: clamp(0.75rem, 2.2vh, 1.1rem);
 }
 
+/* Title stays attached to the content group; auto margins here and on
+   footer split the free space so the group centers vertically */
 header {
-  align-self: stretch;
-  display: grid;
-  grid-template-columns: 2.4rem 1fr 2.4rem;
-  align-items: center;
-  margin-bottom: auto;
-  padding-bottom: 0.5rem;
+  margin-top: auto;
+  padding-bottom: clamp(0.25rem, 2vh, 1rem);
 }
 
 h1 {
   margin: 0;
   text-align: center;
-  font-size: 1.8rem;
+  font-size: clamp(1.5rem, 1.2rem + 2vw, 2rem);
   font-weight: 700;
   letter-spacing: 0.02em;
   color: var(--accent);
@@ -158,6 +168,14 @@ h1 {
 h1 a {
   color: inherit;
   text-decoration: none;
+}
+
+/* Settings gear pinned to the viewport corner, out of the content flow */
+#settingsBtn {
+  position: fixed;
+  top: max(1rem, env(safe-area-inset-top));
+  right: max(1rem, env(safe-area-inset-right));
+  z-index: 10;
 }
 
 .icon-btn {
@@ -180,7 +198,7 @@ h1 a {
   /* pull the label toward the toggle it belongs to */
   margin: 0 0 -0.4rem;
   color: var(--text);
-  font-size: 0.95rem;
+  font-size: clamp(0.9rem, 0.85rem + 0.3vw, 1rem);
 }
 
 .mode {
@@ -196,10 +214,10 @@ h1 a {
 .mode button {
   border: 1px solid transparent;
   border-radius: 999px;
-  padding: 0.55rem 1.2rem;
+  padding: 0.55rem clamp(0.8rem, 3vw, 1.2rem);
   font: inherit;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: clamp(0.85rem, 0.8rem + 0.3vw, 0.95rem);
   background: transparent;
   color: var(--muted);
   cursor: pointer;
@@ -207,7 +225,7 @@ h1 a {
 
 .mode button[aria-pressed="true"] {
   background: rgba(255, 255, 255, 0.1);
-  border-color: var(--text);
+  border-color: var(--mode-accent);
   color: var(--text);
 }
 
@@ -225,8 +243,8 @@ h1 a {
   background: var(--card);
   border: 1px solid var(--card-border);
   border-radius: 999px;
-  padding: 0.2rem 1.2rem;
-  font-size: clamp(1.6rem, 6vh, 2.2rem);
+  padding: 0.2rem clamp(0.8rem, 4vw, 1.2rem);
+  font-size: clamp(1.5rem, 1.2rem + 2.5vw, 2.2rem);
   font-weight: 650;
   font-variant-numeric: tabular-nums;
 }
@@ -235,7 +253,7 @@ h1 a {
   font: inherit;
   width: 2.2ch;
   text-align: center;
-  color: var(--text);
+  color: var(--mode-accent);
   background: transparent;
   border: 0;
   padding: 0;
@@ -246,10 +264,10 @@ h1 a {
 }
 
 #ampm {
-  font-size: clamp(1.1rem, 4vh, 1.5rem);
+  font-size: clamp(1rem, 0.9rem + 1.2vw, 1.5rem);
   font-weight: 650;
   padding: 0.2rem 1rem;
-  color: var(--text);
+  color: var(--mode-accent);
 }
 
 .pill {
@@ -258,7 +276,7 @@ h1 a {
   padding: 0.55rem 1.4rem;
   font: inherit;
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: clamp(0.9rem, 0.85rem + 0.3vw, 0.95rem);
   background: var(--card);
   color: var(--accent);
   cursor: pointer;
@@ -277,17 +295,17 @@ h1 a {
   padding: 0.65rem 1.6rem;
   font: inherit;
   font-weight: 700;
-  font-size: 1rem;
-  background: var(--accent);
+  font-size: clamp(0.95rem, 0.9rem + 0.3vw, 1rem);
+  background: var(--mode-accent);
   color: #17123a;
   cursor: pointer;
-  box-shadow: 0 4px 24px rgba(179, 165, 242, 0.35);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 4px 24px var(--mode-glow);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.2s ease;
 }
 
 .cta:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 28px rgba(179, 165, 242, 0.5);
+  box-shadow: 0 6px 28px var(--mode-glow);
 }
 
 .results {
@@ -301,8 +319,9 @@ h1 a {
 .lead {
   margin: 0;
   text-align: center;
-  color: var(--muted);
-  font-size: 0.95rem;
+  color: var(--text);
+  font-size: clamp(1.05rem, 1rem + 0.5vw, 1.25rem);
+  font-weight: 600;
 }
 
 .tip {
@@ -310,7 +329,7 @@ h1 a {
   max-width: 30rem;
   text-align: center;
   color: var(--muted);
-  font-size: 0.85rem;
+  font-size: clamp(0.8rem, 0.75rem + 0.3vw, 0.9rem);
   line-height: 1.5;
 }
 
@@ -323,14 +342,7 @@ h1 a {
   gap: 0.75rem;
 }
 
-/* Max 3 per row */
-@media (min-width: 40rem) {
-  .cards {
-    grid-template-columns: repeat(3, 1fr);
-    max-width: 34rem;
-  }
-}
-
+/* One shared card design; rating shows only in the time color */
 .card {
   aspect-ratio: 1;
   display: flex;
@@ -340,9 +352,9 @@ h1 a {
   gap: 0.4rem;
   padding: 1rem;
   border-radius: 1.25rem;
-  border: 1px solid var(--card-border);
-  background: var(--card);
-  backdrop-filter: blur(2px);
+  border: 1px solid var(--panel-border);
+  background: var(--panel);
+  backdrop-filter: blur(10px) saturate(1.2);
   animation: rise 0.45s ease-out backwards;
 }
 
@@ -353,38 +365,39 @@ h1 a {
   }
 }
 
-.card .moon {
-  font-size: clamp(1.1rem, 3vh, 1.6rem);
-  line-height: 1;
+.card .face {
+  line-height: 0;
+}
+
+.card .face svg {
+  width: clamp(1.4rem, 1.2rem + 1.2vw, 2rem);
+  height: auto;
 }
 
 .card .time {
-  font-size: clamp(1.2rem, 4.5vh, 1.8rem);
+  font-size: clamp(1.2rem, 1rem + 1.6vw, 1.8rem);
   font-weight: 650;
   font-variant-numeric: tabular-nums;
   line-height: 1.2;
+  color: var(--text);
 }
 
 .card .meta {
-  font-size: clamp(0.75rem, 2vh, 0.85rem);
-  color: var(--muted);
+  font-size: clamp(0.75rem, 0.7rem + 0.3vw, 0.85rem);
+  color: #beb5e3;
   line-height: 1.3;
 }
 
-.card.good {
-  border-color: var(--good);
-  background: var(--accent-soft);
-}
-
-.card.good .time {
+/* Rating shows on the face color, time stays white */
+.card.good .face {
   color: var(--good);
 }
 
-.card.ok .time {
+.card.ok .face {
   color: var(--ok);
 }
 
-.card.low .time {
+.card.low .face {
   color: var(--low);
 }
 
@@ -395,18 +408,20 @@ footer {
   flex-direction: column;
   align-items: center;
   gap: 0.6rem;
+  /* sits over the mountains — keep text readable */
+  text-shadow: 0 1px 10px rgba(8, 6, 26, 0.9);
 }
 
 .hint {
   margin: 0;
   text-align: center;
-  color: var(--muted);
-  font-size: 0.8rem;
+  color: #c4bce8;
+  font-size: clamp(0.75rem, 0.7rem + 0.3vw, 0.85rem);
 }
 
 .pill-small {
   padding: 0.4rem 1.1rem;
-  font-size: 0.85rem;
+  font-size: clamp(0.8rem, 0.75rem + 0.3vw, 0.85rem);
 }
 
 .back-btn {
@@ -420,18 +435,19 @@ footer {
   display: none;
 }
 
-/* Settings dialog */
+/* Dialogs: indigo panel, no pure black anywhere */
 dialog {
   border: 1px solid var(--card-border);
   border-radius: 1rem;
-  background: var(--bg2);
+  background: linear-gradient(180deg, #251a63, var(--bg2));
   color: var(--text);
   padding: 1.25rem;
   width: min(90vw, 20rem);
 }
 
 dialog::backdrop {
-  background: rgba(5, 4, 15, 0.6);
+  background: rgba(19, 12, 56, 0.55);
+  backdrop-filter: blur(4px);
 }
 
 dialog h2 {
@@ -454,31 +470,41 @@ dialog select,
 dialog input {
   font: inherit;
   color: var(--text);
-  background: var(--bg1);
+  background: rgba(10, 9, 32, 0.6);
   border: 1px solid var(--card-border);
   border-radius: 0.6rem;
   padding: 0.55rem 0.7rem;
 }
 
+/* About dialog: minimal — centered title, quiet text, ghost button */
 #about {
   width: min(90vw, 26rem);
 }
 
-.about-body p {
-  margin: 0 0 0.8rem;
-  font-size: 0.9rem;
-  line-height: 1.55;
-  color: var(--text);
-}
-
-.about-body strong {
+#about h2 {
+  text-align: center;
+  text-transform: none;
+  font-size: 1.1rem;
+  letter-spacing: 0.02em;
   color: var(--accent);
 }
 
-.about-body .about-note {
+.about-body p {
+  margin: 0 0 0.7rem;
+  font-size: 0.85rem;
+  line-height: 1.55;
   color: var(--muted);
-  font-size: 0.8rem;
 }
+
+.about-body strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.about-body .about-note {
+  font-size: 0.75rem;
+}
+
 
 #settingsClose,
 #aboutClose {
@@ -489,13 +515,28 @@ dialog input {
   font: inherit;
   font-weight: 650;
   background: var(--accent);
-  color: var(--bg1);
+  color: #17123a;
   cursor: pointer;
+}
+
+/* ghost variant for the about dialog */
+#aboutClose {
+  background: transparent;
+  border: 1px solid var(--card-border);
+  color: var(--accent);
 }
 
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
+}
+
+/* ≥40rem: room for 3 cards per row (max 3) */
+@media (min-width: 40rem) {
+  .cards {
+    grid-template-columns: repeat(3, 1fr);
+    max-width: 34rem;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -512,6 +553,7 @@ dialog input {
 @media (max-height: 26rem) {
   main {
     gap: 0.4rem;
+    padding-top: max(0.75rem, env(safe-area-inset-top));
   }
 
   .cards {

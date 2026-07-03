@@ -1,11 +1,10 @@
-const CACHE_NAME = 'sleeptime-calc-v5';
+const CACHE_NAME = 'sleeptime-calc-v6';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
     './styles.css',
     './script.js',
     './manifest.json',
-    './site.webmanifest',
     './favicon.ico',
     './favicon-16x16.png',
     './favicon-32x32.png',

@@ -1,5 +1,12 @@
 const CYCLES = [6, 5, 4, 3, 2, 1];
-const MOONS = { 6: '🌕', 5: '🌔', 4: '🌓', 3: '🌒', 2: '🌘', 1: '🌑' };
+
+// Rating faces (stroke uses currentColor, so CSS colors them per rating)
+const FACE_ATTRS = 'xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"';
+const FACES = {
+  good: `<svg ${FACE_ATTRS}><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/></svg>`,
+  ok: `<svg ${FACE_ATTRS}><circle cx="12" cy="12" r="10"/><path d="M8 15h8M9 9h.01M15 9h.01"/></svg>`,
+  low: `<svg ${FACE_ATTRS}><circle cx="12" cy="12" r="10"/><path d="M16 16s-1.5-2-4-2-4 2-4 2m1-7h.01M15 9h.01"/></svg>`,
+};
 // Recommended sleep hours per age range (NSF guidelines).
 const AGE_HOURS = { child: [9, 11], teen: [8, 10], adult: [7, 9], senior: [7, 8] };
 
@@ -87,6 +94,7 @@ function rating(hours) {
   const [lo, hi] = AGE_HOURS[age.value] ?? AGE_HOURS.adult;
   if (hours >= lo && hours <= hi) return 'good';
   if (hours >= lo - 1.5 && hours <= hi + 1.5) return 'ok';
+  if (hours === 4.5) return 'ok'; // 3 full cycles: short, but a decent cycle-aligned fallback
   return 'low';
 }
 
@@ -107,10 +115,11 @@ function render() {
     const when = new Date(base.getTime() + sign * (wait + cycle * 90) * 60000);
     const hours = cycle * 1.5;
     const card = document.createElement('article');
-    card.className = `card ${rating(hours)}`;
+    const rate = rating(hours);
+    card.className = `card ${rate}`;
     card.style.animationDelay = `${i * 60}ms`;
     card.innerHTML = `
-      <span class="moon" aria-hidden="true">${MOONS[cycle]}</span>
+      <span class="face" aria-hidden="true">${FACES[rate]}</span>
       <span class="time">${formatTime(when)}</span>
       <span class="meta">${cycle} cycle${cycle > 1 ? 's' : ''} · ${hours} h</span>`;
     cards.append(card);
@@ -127,6 +136,7 @@ function calculate() {
 
 function setMode(next) {
   mode = next;
+  document.body.dataset.mode = mode; // drives per-mode accent colors in CSS
   store(KEYS.mode, mode);
   for (const btn of modeButtons) btn.setAttribute('aria-pressed', String(btn.dataset.mode === mode));
   sleepNowBtn.classList.toggle('hidden', mode !== 'bed');
@@ -166,9 +176,14 @@ document.getElementById('back').addEventListener('click', () => {
 for (const el of [hh, mm]) {
   el.addEventListener('input', () => {
     el.value = el.value.replace(/\D/g, '');
+    if (el === hh && el.value.length === 2) mm.select(); // auto-advance to minutes
     onTimeEdit();
   });
+  el.addEventListener('focus', () => el.select()); // type over, no manual clearing
   el.addEventListener('blur', writeInputs); // re-pad and clamp display
+  el.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') calculate();
+  });
 }
 
 ampmBtn.addEventListener('click', () => {
